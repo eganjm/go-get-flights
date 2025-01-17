@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: get-flights-sched
+  namespace: airline
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flights
+  template:
+    metadata:
+      labels:
+        app: flights
+    spec:
+      containers:
+      - name: get-flights
+        image: public.ecr.aws/a2w7j3w7/repo:get-flights
+        ports:
+        - containerPort: 8080
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: AWS_SECRET_ACCESS_KEY
+

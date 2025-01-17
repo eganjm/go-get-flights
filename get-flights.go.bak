@@ -1,0 +1,53 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+)
+
+func getAllFlights(w http.ResponseWriter, r *http.Request) {
+	// Create an AWS Session
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1"), // Replace with your AWS region
+	}))
+
+	// Create a DynamoDB client
+	svc := dynamodb.New(sess)
+
+	// Scan the table to get all items
+	params := &dynamodb.ScanInput{
+		TableName: aws.String("FlightSchedules"), // Replace with your table name
+	}
+
+	// Perform the scan
+	result, err := svc.Scan(params)
+	if err != nil {
+		http.Error(w, "Error scanning DynamoDB: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Display flight schedules
+	for _, item := range result.Items {
+		flight_id := item["flight_id"].S
+		departure_time := item["departure_time"].S
+		destination := item["destination"].S
+		fmt.Fprintf(w, "Flight: %s, Time: %s, Destination: %s\n", *flight_id, *departure_time, *destination)
+	}
+}
+
+func main() {
+	// Set up the HTTP server and route
+	http.HandleFunc("/flights", getAllFlights)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Starting server on port %s\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
