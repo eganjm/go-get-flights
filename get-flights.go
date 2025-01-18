@@ -31,6 +31,7 @@ func getAllFlights(w http.ResponseWriter, r *http.Request) {
 			"flight_id":      *item["flight_id"].S,
 			"departure_time": *item["departure_time"].S,
 			"destination":    *item["destination"].S,
+			"status":         *item["status"].S,
 		}
 		flights = append(flights, flight)
 	}
@@ -70,7 +71,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8081"
 	}
 	log.Printf("Starting server on port %s\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, handler))
