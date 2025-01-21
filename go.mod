@@ -1,4 +1,4 @@
-module hello
+module departures-service
 
 go 1.22.9
 
